@@ -117,6 +117,8 @@
   The subagent is seeded with the last btw.context_messages user/assistant messages of this
   session (clipped to ~11k characters) as shared context; this session's transcript is untouched.
   Built on nodecode-subagents: each call is a one-worker team, visible to /agents list.
+  Its worker uses the configured auxiliary model, or the parent session model at its
+  weakest reasoning effort when none is configured. Other workers are unaffected.
   Settings: btw.timeout (seconds to wait, default 120, max 300), btw.context_messages (default 10).
   The command blocks until the answer lands or the timeout passes; on timeout it reports worker status.")
 
