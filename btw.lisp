@@ -49,6 +49,28 @@
       (when (string= (car message) "assistant")
         (setf reply (cdr message))))))
 
+(defvar *btw-worker-model* nil
+  "Dynamically bound only while /btw creates its worker.")
+
+(defun prepare-btw-worker (next config node)
+  "Pin a /btw child before submission; leave other workers untouched."
+  (multiple-value-bind (success failure) (funcall next config node)
+    (if (and success *btw-worker-model*)
+        (handler-case
+            (progn
+              (apply #'nlk:record-session-model-selection
+                     (getf node :id) *btw-worker-model*)
+              (values success failure))
+          (error (condition)
+            (subagents::update-node
+             (getf config :id) (getf node :id)
+             (lambda (record)
+               (setf (getf record :status) :failed
+                     (getf record :error) (princ-to-string condition))))
+            (values nil (format nil "failed ~a (~a): model selection: ~a"
+                                (getf node :name) (getf node :id) condition))))
+        (values success failure))))
+
 (defun btw (args session-id)
   "/btw QUESTION => a quick side answer from a fresh subagent."
   (let ((question (string-trim +whitespace+ (or args "")))
