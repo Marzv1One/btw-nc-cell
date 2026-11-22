@@ -137,6 +137,11 @@
                  (nlk:config-error "btw.context_messages is ~d; the maximum is 50"
                                    (getf values :context-messages)))
                values))
+  (:start (lambda ()
+            (hook 'subagents::prepare-node-session "btw-auxiliary-model"
+                  #'prepare-btw-worker)
+            (on-stop (lambda ()
+                       (unhook 'subagents::prepare-node-session "btw-auxiliary-model")))))
   (:command "btw" 'btw
             :catches 'subagents:subagents-error
             :description "Quick side question to a fresh subagent, seeded with the recent conversation")
