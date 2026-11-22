@@ -93,9 +93,13 @@
                                        "The shared context is background from the parent conversation.~%~%"
                                        "Question: ~a")
                                      question)))
-            (subagents:task (list (list :name "btw" :task assignment))
-                            :context context :await t
-                            :timeout-seconds (setting :timeout))
+            (multiple-value-bind (provider model effort) (auxiliary-model session)
+              (unless (and provider model)
+                (error "No auxiliary model or session model is available for /btw."))
+              (let ((*btw-worker-model* (list :provider provider :model model :effort effort)))
+                (subagents:task (list (list :name "btw" :task assignment))
+                                :context context :await t
+                                :timeout-seconds (setting :timeout))))
             (let* ((config (subagents::current-team session))
                    (node (find "btw" (getf config :nodes)
                                :key (lambda (item) (getf item :name))
