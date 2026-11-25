@@ -39,7 +39,9 @@ it reports the worker's status instead.
 ## Requires
 
 The `nodecode-subagents` cell (and its `nodecode-board` dependency) installed
-and running. Workers inherit the parent's model selection.
+and running. `/btw` workers use the configured auxiliary model; if none is
+configured, they use the parent session's model at its weakest reasoning effort.
+Other subagent workers are unaffected.
 
 ## License
 
